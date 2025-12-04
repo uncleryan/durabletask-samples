@@ -1,7 +1,6 @@
-﻿using DurableTask.AzureStorage;
-using DurableTask.Core.Exceptions;
+﻿using DurableTask.Core.Exceptions;
+using DurableTask.SqlServer;
 using DurableTaskSamples.Common.Exceptions;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Configuration;
 
@@ -40,31 +39,43 @@ namespace DurableTaskSamples.Common.Utils
             }
         }
 
-        public static AzureStorageOrchestrationService GetAzureOrchestrationServiceClient()
+        public static SqlOrchestrationService GetSqlServerOrchestrationServiceClient()
         {
-            var storageConnectionString = ConfigurationManager.AppSettings["AzureStorageConnectionString"];
-            if (string.IsNullOrEmpty(storageConnectionString))
+            var connectionString = "Server=.;Database=DurableTask_PoC;Integrated Security=true;Trusted_Connection=True;";
+            var settings = new SqlOrchestrationServiceSettings(connectionString)
             {
-                Console.WriteLine("Azure Storage Connection String is empty, please provide valid connection string");
-                Environment.Exit(0);
-            }
-
-            var taskHubName = ConfigurationManager.AppSettings["TaskHubName"];
-            var azureStorageSettings = new AzureStorageOrchestrationServiceSettings
-            {
-                StorageAccountClientProvider = new StorageAccountClientProvider(storageConnectionString),
-                TaskHubName = taskHubName,
+                CreateDatabaseIfNotExists = true
             };
 
-            bool shouldLogAzureStorageTraces = bool.Parse(ConfigurationManager.AppSettings["LogAzureStorageTraces"]);
-            if (shouldLogAzureStorageTraces)
-            {
-                azureStorageSettings.LoggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-            }
-
-            var orchestrationServiceAndClient = new AzureStorageOrchestrationService(azureStorageSettings);
-            return orchestrationServiceAndClient;
+            var sqlService = new SqlOrchestrationService(settings);
+            return sqlService;
         }
+
+        //public static AzureStorageOrchestrationService GetAzureOrchestrationServiceClient()
+        //{
+        //    var storageConnectionString = ConfigurationManager.AppSettings["AzureStorageConnectionString"];
+        //    if (string.IsNullOrEmpty(storageConnectionString))
+        //    {
+        //        Console.WriteLine("Azure Storage Connection String is empty, please provide valid connection string");
+        //        Environment.Exit(0);
+        //    }
+
+        //    var taskHubName = ConfigurationManager.AppSettings["TaskHubName"];
+        //    var azureStorageSettings = new AzureStorageOrchestrationServiceSettings
+        //    {
+        //        StorageAccountClientProvider = new StorageAccountClientProvider(storageConnectionString),
+        //        TaskHubName = taskHubName,
+        //    };
+
+        //    bool shouldLogAzureStorageTraces = bool.Parse(ConfigurationManager.AppSettings["LogAzureStorageTraces"]);
+        //    if (shouldLogAzureStorageTraces)
+        //    {
+        //        azureStorageSettings.LoggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        //    }
+
+        //    var orchestrationServiceAndClient = new AzureStorageOrchestrationService(azureStorageSettings);
+        //    return orchestrationServiceAndClient;
+        //}
 
         public static bool ShouldLogDtfCoreTraces()
         {

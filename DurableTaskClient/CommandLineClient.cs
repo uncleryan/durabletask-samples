@@ -70,7 +70,7 @@ namespace DurableTaskClient
             Console.WriteLine($"Executing {orchestrationSample.Name}");
             string instanceId = Guid.NewGuid().ToString();
 
-            var orchestrationServiceAndClient = Utils.GetAzureOrchestrationServiceClient();
+            var orchestrationServiceAndClient = Utils.GetSqlServerOrchestrationServiceClient(); //Utils.GetAzureOrchestrationServiceClient();
             Console.WriteLine(orchestrationServiceAndClient.ToString());
             var taskHubClient = new TaskHubClient(orchestrationServiceAndClient);
 
