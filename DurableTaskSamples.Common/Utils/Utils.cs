@@ -3,6 +3,7 @@ using DurableTask.SqlServer;
 using DurableTaskSamples.Common.Exceptions;
 using System;
 using System.Configuration;
+using System.Threading.Tasks;
 
 namespace DurableTaskSamples.Common.Utils
 {
@@ -39,15 +40,16 @@ namespace DurableTaskSamples.Common.Utils
             }
         }
 
-        public static SqlOrchestrationService GetSqlServerOrchestrationServiceClient()
+        public static async Task<SqlOrchestrationService> GetSqlServerOrchestrationServiceClient()
         {
-            var connectionString = "Server=.;Database=DurableTask_PoC;Integrated Security=true;Trusted_Connection=True;";
+            var connectionString = "Server=localhost;Database=DurableTask_PoC;Integrated Security=true;TrustServerCertificate=true;";
             var settings = new SqlOrchestrationServiceSettings(connectionString)
             {
                 CreateDatabaseIfNotExists = true
             };
 
             var sqlService = new SqlOrchestrationService(settings);
+            await sqlService.CreateIfNotExistsAsync();
             return sqlService;
         }
 

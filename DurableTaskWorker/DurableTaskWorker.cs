@@ -44,7 +44,7 @@ namespace DurableTaskSamples.DurableTaskWorker
                 eventListener.EnableEvents(DefaultEventSource.Log, EventLevel.Informational);
             }
 
-            var orchestrationServiceAndClient = Utils.GetSqlServerOrchestrationServiceClient(); //Utils.GetAzureOrchestrationServiceClient();
+            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(); //Utils.GetAzureOrchestrationServiceClient();
             Console.WriteLine(orchestrationServiceAndClient.ToString());
             this.taskHubWorker = new TaskHubWorker(orchestrationServiceAndClient);
             this.taskHubWorker.ErrorPropagationMode = ErrorPropagationMode.SerializeExceptions;

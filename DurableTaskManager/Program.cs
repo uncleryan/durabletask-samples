@@ -16,7 +16,7 @@ namespace DurableTaskManager
 
         static async Task Main(string[] args)
         {
-            var orchestrationServiceAndClient = Utils.GetSqlServerOrchestrationServiceClient();
+            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient();
             Console.WriteLine(orchestrationServiceAndClient.ToString());
             var taskHubClient = new TaskHubClient(orchestrationServiceAndClient);
 
