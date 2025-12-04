@@ -52,7 +52,7 @@ namespace DurableTaskSamples.Common.Utils
             var taskHubName = ConfigurationManager.AppSettings["TaskHubName"];
             var azureStorageSettings = new AzureStorageOrchestrationServiceSettings
             {
-                StorageAccountDetails = new StorageAccountDetails { ConnectionString = storageConnectionString },
+                StorageAccountClientProvider = new StorageAccountClientProvider(storageConnectionString),
                 TaskHubName = taskHubName,
             };
 
