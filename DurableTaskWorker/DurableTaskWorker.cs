@@ -26,6 +26,7 @@ namespace DurableTaskSamples.DurableTaskWorker
                 typeof(FixedPollingWithInlineRetriesOrchestration),
                 typeof(UnboundedPollingWithInlineRetriesOrchestration),
                 typeof(UnboundedPollingWithContinueAsNewOrchestration));
+
             this.taskHubWorker.AddTaskActivities(
                 new GreetingActivity(),
                 new FirstActivity(),
@@ -33,6 +34,7 @@ namespace DurableTaskSamples.DurableTaskWorker
                 new RetryableExceptionThrowingActivity(),
                 new PollingActivity(),
                 new AlwaysThrowingActivity());
+
             await this.taskHubWorker.StartAsync();
         }
 
