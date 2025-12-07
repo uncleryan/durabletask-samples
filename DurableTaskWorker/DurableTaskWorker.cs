@@ -39,10 +39,16 @@ namespace DurableTaskSamples.DurableTaskWorker
 
         public async Task Start()
         {
+            // Build configuration from multiple sources including Aspire-injected values
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()  // Aspire injects connection strings via environment variables
                 .Build();
+
+            // Debug: Print the connection string to verify it's being loaded
+            var connString = configuration.GetConnectionString("durableDb");
+            Console.WriteLine($"Connection String: {connString ?? "NULL - NOT FOUND"}");
 
             if (Utils.ShouldLogDtfCoreTraces())
             {
@@ -51,7 +57,7 @@ namespace DurableTaskSamples.DurableTaskWorker
                 eventListener.EnableEvents(DefaultEventSource.Log, EventLevel.Informational);
             }
 
-            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(configuration); //Utils.GetAzureOrchestrationServiceClient();
+            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(configuration);
             Console.WriteLine(orchestrationServiceAndClient.ToString());
             this.taskHubWorker = new TaskHubWorker(orchestrationServiceAndClient);
             this.taskHubWorker.ErrorPropagationMode = ErrorPropagationMode.SerializeExceptions;

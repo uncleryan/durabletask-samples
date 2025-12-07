@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DurableTaskClient\DurableTaskClient.csproj" />
+    <ProjectReference Include="..\DurableTaskManager\DurableTaskManager.csproj" />
     <ProjectReference Include="..\DurableTaskWorker\DurableTaskWorker.csproj" />
   </ItemGroup>
 
