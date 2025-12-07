@@ -1,9 +1,11 @@
 ﻿using DurableTask.Core;
 using DurableTaskSamples;
 using DurableTaskSamples.Common.Utils;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -54,6 +56,12 @@ namespace DurableTaskClient
 
         public static async Task Start()
         {
+            // Build configuration from App.config or appsettings.json
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
             PrintCommandLine();
             if (!int.TryParse(Console.ReadLine(), out int input))
             {
@@ -70,7 +78,7 @@ namespace DurableTaskClient
             Console.WriteLine($"Executing {orchestrationSample.Name}");
             string instanceId = Guid.NewGuid().ToString();
 
-            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(); //Utils.GetAzureOrchestrationServiceClient();
+            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(configuration);
             Console.WriteLine(orchestrationServiceAndClient.ToString());
 
             var taskHubClient = new TaskHubClient(orchestrationServiceAndClient);

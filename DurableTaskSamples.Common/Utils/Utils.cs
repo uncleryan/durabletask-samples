@@ -1,9 +1,10 @@
 ﻿using DurableTask.Core.Exceptions;
 using DurableTask.SqlServer;
 using DurableTaskSamples.Common.Exceptions;
+using Microsoft.Extensions.Configuration;
 using System;
-using System.Configuration;
 using System.Threading.Tasks;
+using ConfigMgr = System.Configuration.ConfigurationManager;
 
 namespace DurableTaskSamples.Common.Utils
 {
@@ -40,9 +41,27 @@ namespace DurableTaskSamples.Common.Utils
             }
         }
 
-        public static async Task<SqlOrchestrationService> GetSqlServerOrchestrationServiceClient()
+        public static async Task<SqlOrchestrationService> GetSqlServerOrchestrationServiceClient(IConfiguration configuration = null)
         {
-            var connectionString = "Server=localhost;Database=DurableTask_PoC;Integrated Security=true;TrustServerCertificate=true;";
+            string connectionString = null;
+
+            if (configuration != null)
+            {
+                connectionString = configuration.GetConnectionString("durableDb");
+            }
+
+            // Fallback to ConfigurationManager if IConfiguration not provided
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                connectionString = ConfigMgr.ConnectionStrings["durableDb"]?.ConnectionString;
+            }
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                // Fallback to hardcoded connection string if not found
+                connectionString = "Server=localhost;Database=DurableTask_PoC;Integrated Security=true;TrustServerCertificate=true;";
+            }
+
             var settings = new SqlOrchestrationServiceSettings(connectionString)
             {
                 CreateDatabaseIfNotExists = true
@@ -55,21 +74,21 @@ namespace DurableTaskSamples.Common.Utils
 
         //public static AzureStorageOrchestrationService GetAzureOrchestrationServiceClient()
         //{
-        //    var storageConnectionString = ConfigurationManager.AppSettings["AzureStorageConnectionString"];
+        //    var storageConnectionString = ConfigMgr.AppSettings["AzureStorageConnectionString"];
         //    if (string.IsNullOrEmpty(storageConnectionString))
         //    {
         //        Console.WriteLine("Azure Storage Connection String is empty, please provide valid connection string");
         //        Environment.Exit(0);
         //    }
 
-        //    var taskHubName = ConfigurationManager.AppSettings["TaskHubName"];
+        //    var taskHubName = ConfigMgr.AppSettings["TaskHubName"];
         //    var azureStorageSettings = new AzureStorageOrchestrationServiceSettings
         //    {
         //        StorageAccountClientProvider = new StorageAccountClientProvider(storageConnectionString),
         //        TaskHubName = taskHubName,
         //    };
 
-        //    bool shouldLogAzureStorageTraces = bool.Parse(ConfigurationManager.AppSettings["LogAzureStorageTraces"]);
+        //    bool shouldLogAzureStorageTraces = bool.Parse(ConfigMgr.AppSettings["LogAzureStorageTraces"]);
         //    if (shouldLogAzureStorageTraces)
         //    {
         //        azureStorageSettings.LoggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
@@ -81,17 +100,17 @@ namespace DurableTaskSamples.Common.Utils
 
         public static bool ShouldLogDtfCoreTraces()
         {
-            return bool.Parse(ConfigurationManager.AppSettings["LogDtfCoreEventTraces"]);
+            return bool.Parse(ConfigMgr.AppSettings["LogDtfCoreEventTraces"]);
         }
 
         public static bool ShouldDisableVerboseLogsInOrchestration()
         {
-            return bool.Parse(ConfigurationManager.AppSettings["DisableOrchestrationVerboseLogs"]);
+            return bool.Parse(ConfigMgr.AppSettings["DisableOrchestrationVerboseLogs"]);
         }
 
         public static bool ShouldLaunchInstanceManager()
         {
-            return bool.Parse(ConfigurationManager.AppSettings["LaunchInstanceManager"]);
+            return bool.Parse(ConfigMgr.AppSettings["LaunchInstanceManager"]);
         }
 
         public static void WriteToConsoleWithColor(string text, ConsoleColor color)

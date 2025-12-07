@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace DurableTaskSamples.DurableTaskWorker
 {
-    internal class DurableTaskWorker
+    public class DurableTaskWorker
     {
         private TaskHubWorker taskHubWorker;
 
