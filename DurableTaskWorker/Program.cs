@@ -2,7 +2,9 @@
 {
     using DurableTaskSamples.Common.Logging;
     using DurableTaskSamples.Common.Utils;
+    using Microsoft.Extensions.Configuration;
     using System;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -12,9 +14,16 @@
 
         static async Task Main(string[] args)
         {
+            // Build configuration from multiple sources including Aspire-injected values
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()  // Aspire injects connection strings via environment variables
+                .Build();
+
             if (args.Length == 0)
             {
-                if (Utils.ShouldDisableVerboseLogsInOrchestration())
+                if (Utils.ShouldDisableVerboseLogsInOrchestration(configuration))
                 {
                     Logger.SetVerbosity(false);
                 }
@@ -28,12 +37,13 @@
                 }
             }
 
-            Console.CancelKeyPress += (sender, eArgs) => {
+            Console.CancelKeyPress += (sender, eArgs) =>
+            {
                 _quitEvent.Set();
                 eArgs.Cancel = true;
             };
 
-            var taskHubWorker = new DurableTaskWorker();
+            var taskHubWorker = new DurableTaskWorker(configuration);
             try
             {
                 Console.WriteLine("Initializing worker");

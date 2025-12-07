@@ -94,7 +94,7 @@ namespace DurableTaskClient
                 var instance = await taskHubClient.CreateOrchestrationInstanceAsync(orchestrationSample, instanceId, orchestrationInput);
                 Console.WriteLine("Workflow Instance Started: " + instance);
 
-                if (Utils.ShouldLaunchInstanceManager())
+                if (Utils.ShouldLaunchInstanceManager(configuration))
                 {
                     using (var p = new Process())
                     {

@@ -21,6 +21,7 @@ namespace DurableTaskManager
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()  // Aspire injects connection strings via environment variables
                 .Build();
 
             var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(configuration);

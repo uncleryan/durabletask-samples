@@ -90,19 +90,19 @@ namespace DurableTaskSamples.Common.Utils
         //    return orchestrationServiceAndClient;
         //}
 
-        public static bool ShouldLogDtfCoreTraces()
+        public static bool ShouldLogDtfCoreTraces(IConfiguration configuration)
         {
-            return false;
+            return configuration.GetSection("AppSettings:LogDtfCoreEventTraces").Get<bool>();
         }
 
-        public static bool ShouldDisableVerboseLogsInOrchestration()
+        public static bool ShouldDisableVerboseLogsInOrchestration(IConfiguration configuration)
         {
-            return true;
+            return configuration.GetSection("AppSettings:DisableOrchestrationVerboseLogs").Get<bool>();
         }
 
-        public static bool ShouldLaunchInstanceManager()
+        public static bool ShouldLaunchInstanceManager(IConfiguration configuration)
         {
-            return true;
+            return configuration.GetSection("AppSettings:LaunchInstanceManager").Get<bool>();
         }
 
         public static void WriteToConsoleWithColor(string text, ConsoleColor color)

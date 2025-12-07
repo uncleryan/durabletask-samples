@@ -6,12 +6,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 using System;
 using System.Diagnostics.Tracing;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace DurableTaskSamples.DurableTaskWorker
 {
-    public class DurableTaskWorker
+    public class DurableTaskWorker(IConfiguration _configuration)
     {
         private TaskHubWorker taskHubWorker;
 
@@ -39,25 +38,18 @@ namespace DurableTaskSamples.DurableTaskWorker
 
         public async Task Start()
         {
-            // Build configuration from multiple sources including Aspire-injected values
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()  // Aspire injects connection strings via environment variables
-                .Build();
-
             // Debug: Print the connection string to verify it's being loaded
-            var connString = configuration.GetConnectionString("durableDb");
+            var connString = _configuration.GetConnectionString("durableDb");
             Console.WriteLine($"Connection String: {connString ?? "NULL - NOT FOUND"}");
 
-            if (Utils.ShouldLogDtfCoreTraces())
+            if (Utils.ShouldLogDtfCoreTraces(_configuration))
             {
                 var eventListener = new ObservableEventListener();
                 eventListener.LogToConsole(formatter: new DtfEventFormatter());
                 eventListener.EnableEvents(DefaultEventSource.Log, EventLevel.Informational);
             }
 
-            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(configuration);
+            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(_configuration);
             Console.WriteLine(orchestrationServiceAndClient.ToString());
             this.taskHubWorker = new TaskHubWorker(orchestrationServiceAndClient);
             this.taskHubWorker.ErrorPropagationMode = ErrorPropagationMode.SerializeExceptions;
