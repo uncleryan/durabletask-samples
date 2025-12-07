@@ -2,9 +2,11 @@
 using DurableTask.Core.Tracing;
 using DurableTaskSamples.Common.Logging;
 using DurableTaskSamples.Common.Utils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 using System;
 using System.Diagnostics.Tracing;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace DurableTaskSamples.DurableTaskWorker
@@ -37,6 +39,11 @@ namespace DurableTaskSamples.DurableTaskWorker
 
         public async Task Start()
         {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
             if (Utils.ShouldLogDtfCoreTraces())
             {
                 var eventListener = new ObservableEventListener();
@@ -44,7 +51,7 @@ namespace DurableTaskSamples.DurableTaskWorker
                 eventListener.EnableEvents(DefaultEventSource.Log, EventLevel.Informational);
             }
 
-            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(); //Utils.GetAzureOrchestrationServiceClient();
+            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(configuration); //Utils.GetAzureOrchestrationServiceClient();
             Console.WriteLine(orchestrationServiceAndClient.ToString());
             this.taskHubWorker = new TaskHubWorker(orchestrationServiceAndClient);
             this.taskHubWorker.ErrorPropagationMode = ErrorPropagationMode.SerializeExceptions;

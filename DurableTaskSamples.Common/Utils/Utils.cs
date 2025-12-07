@@ -4,7 +4,6 @@ using DurableTaskSamples.Common.Exceptions;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
-using ConfigMgr = System.Configuration.ConfigurationManager;
 
 namespace DurableTaskSamples.Common.Utils
 {
@@ -41,7 +40,7 @@ namespace DurableTaskSamples.Common.Utils
             }
         }
 
-        public static async Task<SqlOrchestrationService> GetSqlServerOrchestrationServiceClient(IConfiguration configuration = null)
+        public static async Task<SqlOrchestrationService> GetSqlServerOrchestrationServiceClient(IConfiguration configuration)
         {
             string connectionString = null;
 
@@ -50,16 +49,9 @@ namespace DurableTaskSamples.Common.Utils
                 connectionString = configuration.GetConnectionString("durableDb");
             }
 
-            // Fallback to ConfigurationManager if IConfiguration not provided
             if (string.IsNullOrEmpty(connectionString))
             {
-                connectionString = ConfigMgr.ConnectionStrings["durableDb"]?.ConnectionString;
-            }
-
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                // Fallback to hardcoded connection string if not found
-                connectionString = "Server=localhost;Database=DurableTask_PoC;Integrated Security=true;TrustServerCertificate=true;";
+                throw new ArgumentException("SQL Server Connection String is empty, please provide valid connection string");
             }
 
             var settings = new SqlOrchestrationServiceSettings(connectionString)
@@ -100,17 +92,17 @@ namespace DurableTaskSamples.Common.Utils
 
         public static bool ShouldLogDtfCoreTraces()
         {
-            return bool.Parse(ConfigMgr.AppSettings["LogDtfCoreEventTraces"]);
+            return false;
         }
 
         public static bool ShouldDisableVerboseLogsInOrchestration()
         {
-            return bool.Parse(ConfigMgr.AppSettings["DisableOrchestrationVerboseLogs"]);
+            return true;
         }
 
         public static bool ShouldLaunchInstanceManager()
         {
-            return bool.Parse(ConfigMgr.AppSettings["LaunchInstanceManager"]);
+            return true;
         }
 
         public static void WriteToConsoleWithColor(string text, ConsoleColor color)

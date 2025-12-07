@@ -1,6 +1,8 @@
 ﻿using DurableTask.Core;
 using DurableTaskSamples.Common.Utils;
+using Microsoft.Extensions.Configuration;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace DurableTaskManager
@@ -16,7 +18,12 @@ namespace DurableTaskManager
 
         static async Task Main(string[] args)
         {
-            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient();
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            var orchestrationServiceAndClient = await Utils.GetSqlServerOrchestrationServiceClient(configuration);
             Console.WriteLine(orchestrationServiceAndClient.ToString());
             var taskHubClient = new TaskHubClient(orchestrationServiceAndClient);
 
