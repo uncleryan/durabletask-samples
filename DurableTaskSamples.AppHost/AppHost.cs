@@ -5,8 +5,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 var db = builder.AddSqlServer("durableSql").AddDatabase("durableDb");
 
 builder.AddProject<DurableTaskClient>("durableClient")
-    .WithReference(db)
-    .WaitForStart(db);
+.WithReference(db)
+.WaitForStart(db)
+.ExcludeFromManifest();
 
 builder.AddProject<DurableTaskWorker>("durableWorker")
    .WithReference(db)
