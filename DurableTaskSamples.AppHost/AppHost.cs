@@ -2,7 +2,10 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var db = builder.AddSqlServer("durableSql").AddDatabase("durableDb");
+var db = builder.AddSqlServer("durableSql")
+    .WithDataVolume("durableDb-volume")
+    //.WithDataBindMount("./path/to/local/folder")
+    .AddDatabase("durableDb");
 
 // Launch DurableTaskClient as an executable with its own interactive console window
 //var clientProjectPath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "DurableTaskClient"));
