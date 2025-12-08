@@ -54,15 +54,8 @@ namespace DurableTaskClient
             Utils.WriteToConsoleWithColor("Enter you input: ", ConsoleColor.Yellow);
         }
 
-        public static async Task Start()
+        public static async Task Start(IConfiguration configuration)
         {
-            // Build configuration from multiple sources including Aspire-injected values
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables()  // Aspire injects connection strings via environment variables
-                .Build();
-
             // Debug: Print the connection string to verify it's being loaded
             var connString = configuration.GetConnectionString("durableDb");
             Console.WriteLine($"Connection String: {connString ?? "NULL - NOT FOUND"}");
