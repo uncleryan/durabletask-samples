@@ -1,5 +1,6 @@
 ﻿namespace DurableTaskClient
 {
+    using DurableTask.Core.Settings;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
@@ -12,6 +13,8 @@
     {
         static async Task Main(string[] args)
         {
+            CorrelationSettings.Current.EnableDistributedTracing = true;
+
             // Build host with OpenTelemetry configured for Aspire
             var builder = Host.CreateApplicationBuilder(args);
 
@@ -47,6 +50,7 @@
                 .WithTracing(tracing =>
                 {
                     tracing.AddSource(builder.Environment.ApplicationName)
+                        .AddSource("DurableTask.Core")
                         .AddHttpClientInstrumentation()
                         .AddSqlClientInstrumentation(options =>
                         {

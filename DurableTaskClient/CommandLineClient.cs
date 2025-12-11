@@ -100,12 +100,20 @@ namespace DurableTaskClient
 
                 if (Utils.ShouldLaunchInstanceManager(configuration))
                 {
-                    using (var p = new Process())
+                    string managerPath = GetDurableTaskManagerPath();
+                    if (File.Exists(managerPath))
                     {
-                        p.StartInfo.FileName = $"..\\DurableTaskManager\\bin\\Debug\\net6.0\\DurableTaskManager.exe";
-                        p.StartInfo.Arguments = instanceId;
-                        p.StartInfo.UseShellExecute = true;
-                        p.Start();
+                        using (var p = new Process())
+                        {
+                            p.StartInfo.FileName = managerPath;
+                            p.StartInfo.Arguments = instanceId;
+                            p.StartInfo.UseShellExecute = true;
+                            p.Start();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Warning: Could not find DurableTaskManager.exe at {managerPath}");
                     }
                 }
 
@@ -120,6 +128,23 @@ namespace DurableTaskClient
             {
                 Console.WriteLine(ex);
             }
+        }
+
+        private static string GetDurableTaskManagerPath()
+        {
+            // Try relative to project root (if working dir is project root)
+            string relativePath = Path.Combine("..", "DurableTaskManager", "bin", "Debug", "net10.0", "DurableTaskManager.exe");
+            string absolutePath = Path.GetFullPath(relativePath);
+            if (File.Exists(absolutePath))
+            {
+                return absolutePath;
+            }
+
+            // Try relative to bin output (if working dir is bin/Debug/net10.0)
+            relativePath = Path.Combine("..", "..", "..", "..", "DurableTaskManager", "bin", "Debug", "net10.0", "DurableTaskManager.exe");
+            absolutePath = Path.GetFullPath(relativePath);
+            
+            return absolutePath;
         }
     }
 }
