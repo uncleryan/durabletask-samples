@@ -7,6 +7,7 @@ using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 using System;
 using System.Diagnostics.Tracing;
 using System.Threading.Tasks;
+using DurableTaskSamples.Otp;
 
 namespace DurableTaskSamples.DurableTaskWorker
 {
@@ -25,7 +26,8 @@ namespace DurableTaskSamples.DurableTaskWorker
                 typeof(ErrorHandlingWithInlineRetriesOrchestration),
                 typeof(FixedPollingWithInlineRetriesOrchestration),
                 typeof(UnboundedPollingWithInlineRetriesOrchestration),
-                typeof(UnboundedPollingWithContinueAsNewOrchestration));
+                typeof(UnboundedPollingWithContinueAsNewOrchestration),
+                typeof(OtpOrchestration));
 
             this.taskHubWorker.AddTaskActivities(
                 new GreetingActivity(),
@@ -33,7 +35,9 @@ namespace DurableTaskSamples.DurableTaskWorker
                 new SecondActivity(),
                 new RetryableExceptionThrowingActivity(),
                 new PollingActivity(),
-                new AlwaysThrowingActivity());
+                new AlwaysThrowingActivity(),
+                new GenerateOtpActivity(),
+                new SendOtpActivity());
 
             await this.taskHubWorker.StartAsync();
         }

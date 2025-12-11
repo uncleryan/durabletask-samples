@@ -1,6 +1,7 @@
 ﻿using DurableTask.Core;
 using DurableTaskSamples;
 using DurableTaskSamples.Common.Utils;
+using DurableTaskSamples.Otp;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ namespace DurableTaskClient
             { 7, typeof(FixedPollingWithInlineRetriesOrchestration)},
             { 8, typeof(UnboundedPollingWithInlineRetriesOrchestration)},
             { 9, typeof(UnboundedPollingWithContinueAsNewOrchestration)},
+            { 10, typeof(OtpOrchestration)},
         };
 
         private static readonly Dictionary<Type, object> orchestrationInputs = new Dictionary<Type, object>()
@@ -37,6 +39,7 @@ namespace DurableTaskClient
             { typeof(FixedPollingWithInlineRetriesOrchestration), 10},
             { typeof(UnboundedPollingWithInlineRetriesOrchestration), 0},
             { typeof(UnboundedPollingWithContinueAsNewOrchestration), 0},
+            { typeof(OtpOrchestration), "User1"},
         };
 
         private static void PrintCommandLine()
@@ -86,6 +89,14 @@ namespace DurableTaskClient
                 var orchestrationInput = orchestrationInputs[orchestrationSample];
                 var instance = await taskHubClient.CreateOrchestrationInstanceAsync(orchestrationSample, instanceId, orchestrationInput);
                 Console.WriteLine("Workflow Instance Started: " + instance);
+
+                if (orchestrationSample == typeof(OtpOrchestration))
+                {
+                    Console.WriteLine("OTP Orchestration started. Please check the worker logs for the generated OTP.");
+                    Console.Write("Enter the OTP: ");
+                    string otp = Console.ReadLine();
+                    await taskHubClient.RaiseEventAsync(instance, "OtpSubmit", otp);
+                }
 
                 if (Utils.ShouldLaunchInstanceManager(configuration))
                 {
