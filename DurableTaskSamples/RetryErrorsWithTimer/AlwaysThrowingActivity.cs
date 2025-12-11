@@ -1,27 +1,26 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
     using DurableTaskSamples.Common.Exceptions;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
 
     public class AlwaysThrowingActivity : TaskActivity<int, bool>
     {
+        private readonly ILogger<AlwaysThrowingActivity> _logger;
         private readonly int retryAfterSeconds;
         
-        public AlwaysThrowingActivity(int retryAfterSeconds = 5)
+        public AlwaysThrowingActivity(ILogger<AlwaysThrowingActivity> logger, int retryAfterSeconds = 5)
         {
+            _logger = logger;
             this.retryAfterSeconds = retryAfterSeconds;
         }
 
-        private const string Source = "AlwaysThrowingActivity";
-
         protected override bool Execute(TaskContext context, int input)
         {
-            Logger.Log(Source, "Starting");
-            Logger.Log(Source, $"Executing {input}");
+            _logger.LogInformation("Starting");
+            _logger.LogInformation("Executing {Input}", input);
 
-            Logger.Log(Source, "Throwing");
+            _logger.LogInformation("Throwing");
             throw new RetryableWithDelayException(this.retryAfterSeconds, $"My job is to throw always. ");
         }
     }

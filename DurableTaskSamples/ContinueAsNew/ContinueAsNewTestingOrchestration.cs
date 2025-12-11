@@ -1,7 +1,7 @@
 ﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
@@ -10,13 +10,18 @@
     /// </summary>
     public class ContinueAsNewTestingOrchestration : TaskOrchestration<bool, int>
     {
-        private const string Source = "ContinueAsNewTestingOrchestration";
+        private readonly ILogger<ContinueAsNewTestingOrchestration> _logger;
+
+        public ContinueAsNewTestingOrchestration(ILogger<ContinueAsNewTestingOrchestration> logger)
+        {
+            _logger = logger;
+        }
 
         public override async Task<bool> RunTask(OrchestrationContext context, int input)
         {
             try
             {
-                Logger.Log(Source, $"Initiating, IsReplaying: {context.IsReplaying}");
+                _logger.LogInformation("Initiating, IsReplaying: {IsReplaying}", context.IsReplaying);
                 await context.ScheduleTask<bool>(typeof(GreetingActivity), input);
                 
                 if (input < 3)
@@ -24,12 +29,12 @@
                     context.ContinueAsNew(input + 1);
                 }
 
-                Logger.Log(Source, "Completed");
+                _logger.LogInformation("Completed");
                 return true;
             }
             catch (Exception ex)
             {
-                Logger.Log(Source, ex.ToString());
+                _logger.LogError(ex, "Error in orchestration");
                 return false;
             }
         }

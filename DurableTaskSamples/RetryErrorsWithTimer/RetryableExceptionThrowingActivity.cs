@@ -1,36 +1,37 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
     using DurableTaskSamples.Common.Exceptions;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
 
     public class RetryableExceptionThrowingActivity : TaskActivity<int, bool>
     {
+        private readonly ILogger<RetryableExceptionThrowingActivity> _logger;
         private readonly int numThrows;
         private readonly int retryAfterSeconds;
-        public RetryableExceptionThrowingActivity(int numThrows = 5, int retryAfterSeconds = 10)
+
+        public RetryableExceptionThrowingActivity(ILogger<RetryableExceptionThrowingActivity> logger, int numThrows = 5, int retryAfterSeconds = 10)
         {
+            _logger = logger;
             this.numThrows = numThrows;
             this.retryAfterSeconds = retryAfterSeconds;
         }
-        private const string Source = "RetryableExceptionThrowingActivity";
+
         protected override bool Execute(TaskContext context, int input)
         {
-            Logger.Log(Source, "Starting");
-            Logger.Log(Source, $"Executing {input}");
+            _logger.LogInformation("Starting");
+            _logger.LogInformation("Executing {Input}", input);
 
             if (input < this.numThrows)
             {
-                Logger.Log(Source, "Throwing");
+                _logger.LogInformation("Throwing");
                 throw new RetryableWithDelayException(this.retryAfterSeconds, $"My job is to throw {this.numThrows} times.");
             }
             else
             {
-                Logger.Log(Source, "Completed");
+                _logger.LogInformation("Completed");
                 return true;
             }
-
         }
     }
 }

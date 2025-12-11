@@ -1,34 +1,38 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
     public class UnboundedPollingWithContinueAsNewOrchestration : TaskOrchestration<bool, int>
     {
-        private const string Source = "UnboundedPollingWithContinueAsNewOrchestration";
+        private readonly ILogger<UnboundedPollingWithContinueAsNewOrchestration> _logger;
         private const int PollingIntervalInSeconds = 10;
+
+        public UnboundedPollingWithContinueAsNewOrchestration(ILogger<UnboundedPollingWithContinueAsNewOrchestration> logger)
+        {
+            _logger = logger;
+        }
 
         public override async Task<bool> RunTask(OrchestrationContext context, int input)
         {
-            Logger.Log(Source, $"Initiating, IsReplaying: {context.IsReplaying}");
+            _logger.LogInformation("Initiating, IsReplaying: {IsReplaying}", context.IsReplaying);
 
-            Logger.LogVerbose(Source, $"Polling attempt {input}");
+            _logger.LogDebug("Polling attempt {Attempt}", input);
             bool result = await context.ScheduleTask<bool>(typeof(PollingActivity), input);
 
             if (result)
             {
-                Logger.Log(Source, "Polling success");
-                Logger.Log(Source, "Completed");
+                _logger.LogInformation("Polling success");
+                _logger.LogInformation("Completed");
                 return true;
             }
             else
             {
-                Logger.LogVerbose(Source, $"Polling did not return success, scheduling next poll after {PollingIntervalInSeconds} seconds.");
+                _logger.LogDebug("Polling did not return success, scheduling next poll after {PollingInterval} seconds.", PollingIntervalInSeconds);
                 int newInput = await context.CreateTimer<int>(context.CurrentUtcDateTime.AddSeconds(PollingIntervalInSeconds), input + 1);
-                Logger.Log(Source, $"Polling timer elapsed, continuing as new");
+                _logger.LogInformation("Polling timer elapsed, continuing as new");
                 context.ContinueAsNew(newInput);
             }
 

@@ -1,47 +1,52 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
     using DurableTask.Core.Exceptions;
-    using DurableTaskSamples.Common.Logging;
     using DurableTaskSamples.Common.Utils;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
     public class ErrorHandlingWithInlineRetriesOrchestration : TaskOrchestration<bool, int>
     {
-        private const string Source = "ErrorHandlingWithInlineRetriesOrchestration";
+        private readonly ILogger<ErrorHandlingWithInlineRetriesOrchestration> _logger;
+
+        public ErrorHandlingWithInlineRetriesOrchestration(ILogger<ErrorHandlingWithInlineRetriesOrchestration> logger)
+        {
+            _logger = logger;
+        }
+
         public override async Task<bool> RunTask(OrchestrationContext context, int input)
         {
-            Logger.Log(Source, "Starting");
+            _logger.LogInformation("Starting");
             var retryOptions = new RetryOptions(TimeSpan.FromSeconds(1), 2)
             {
                 Handle = (ex) =>
                 {
-                    Logger.Log(Source, ex.GetType().Name);
+                    _logger.LogInformation("Exception type: {ExceptionType}", ex.GetType().Name);
                     return !Utils.IsCustomRetryException((TaskFailedException)ex);
                 }
             };
 
             for (int i = 0; i < input; i++)
             {
-                Logger.Log(Source, $"Attempt {i}");
+                _logger.LogInformation("Attempt {Attempt}", i);
                 try
                 {
                     bool result = await context.ScheduleWithRetry<bool>(typeof(AlwaysThrowingActivity), retryOptions, i);
-                    Logger.Log(Source, $"AlwaysThrowingActivity returned {result}");
+                    _logger.LogInformation("AlwaysThrowingActivity returned {Result}", result);
                     return result;
                 }
                 catch (TaskFailedException ex)
                 {
                     int retryAfterInSeconds = Utils.GetRetryAfterSecondsFromException(ex);
-                    Logger.Log(Source, $"Error in activity, scheduling retry after {retryAfterInSeconds}");
+                    _logger.LogInformation("Error in activity, scheduling retry after {RetryAfterSeconds}", retryAfterInSeconds);
                     int newInput = await context.CreateTimer<int>(context.CurrentUtcDateTime.AddSeconds(retryAfterInSeconds), input + 1);
-                    Logger.Log(Source, "Timer elapsed");
+                    _logger.LogInformation("Timer elapsed");
                 }
             }
 
-            Logger.Log(Source, "Retry attempts exhausted");
+            _logger.LogInformation("Retry attempts exhausted");
             return false;
         }
     }

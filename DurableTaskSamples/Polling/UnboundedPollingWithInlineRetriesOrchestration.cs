@@ -1,47 +1,51 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
     public class UnboundedPollingWithInlineRetriesOrchestration : TaskOrchestration<bool, int>
     {
-        private const string Source = "UnboundedPollingWithInlineRetriesOrchestration";
+        private readonly ILogger<UnboundedPollingWithInlineRetriesOrchestration> _logger;
         private const int PollingIntervalInSeconds = 10;
         private const int MaxPollingPerOrchestrationInstance = 5;
 
+        public UnboundedPollingWithInlineRetriesOrchestration(ILogger<UnboundedPollingWithInlineRetriesOrchestration> logger)
+        {
+            _logger = logger;
+        }
+
         public override async Task<bool> RunTask(OrchestrationContext context, int input)
         {
-            Logger.Log(Source, $"Initiating, IsReplaying: {context.IsReplaying}");
+            _logger.LogInformation("Initiating, IsReplaying: {IsReplaying}", context.IsReplaying);
 
             bool result = false;
             for (int i = 0; i < MaxPollingPerOrchestrationInstance; i++)
             {
-                Logger.Log(Source, $"Polling attempt {input + i}");
+                _logger.LogInformation("Polling attempt {Attempt}", input + i);
                 result = await context.ScheduleTask<bool>(typeof(PollingActivity), input + i);
 
                 if (result)
                 {
-                    Logger.Log(Source, "Polling success");
+                    _logger.LogInformation("Polling success");
                     break;
                 }
                 else
                 {
-                    Logger.LogVerbose(Source, $"Scheduling next poll after {PollingIntervalInSeconds} seconds.");
+                    _logger.LogDebug("Scheduling next poll after {PollingInterval} seconds.", PollingIntervalInSeconds);
                     await context.CreateTimer<int>(context.CurrentUtcDateTime.AddSeconds(PollingIntervalInSeconds), input + 1);
                 }
             }
 
             if (result)
             {
-                Logger.Log(Source, "Completed");
+                _logger.LogInformation("Completed");
                 return true;
             }
             else
             {
-                Logger.Log(Source, $"{input + MaxPollingPerOrchestrationInstance} retries were not enough, continuing as new");
+                _logger.LogInformation("{RetryCount} retries were not enough, continuing as new", input + MaxPollingPerOrchestrationInstance);
                 context.ContinueAsNew(input + MaxPollingPerOrchestrationInstance);
             }
 

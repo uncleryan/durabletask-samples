@@ -1,19 +1,23 @@
 namespace DurableTaskSamples.Otp
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
-    using System;
+    using Microsoft.Extensions.Logging;
 
     public class SendOtpActivity : TaskActivity<OtpRequest, bool>
     {
-        private const string Source = "SendOtpActivity";
+        private readonly ILogger<SendOtpActivity> _logger;
+
+        public SendOtpActivity(ILogger<SendOtpActivity> logger)
+        {
+            _logger = logger;
+        }
 
         protected override bool Execute(TaskContext context, OtpRequest input)
         {
-            Logger.Log(Source, $"Sending OTP '{input.Code}' to user '{input.UserId}'");
+            _logger.LogInformation("Sending OTP '{Code}' to user '{UserId}'", input.Code, input.UserId);
             // Simulate sending delay
             System.Threading.Thread.Sleep(100);
-            Logger.Log(Source, "OTP sent successfully");
+            _logger.LogInformation("OTP sent successfully");
             return true;
         }
     }

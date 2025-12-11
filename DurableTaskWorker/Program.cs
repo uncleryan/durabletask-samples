@@ -1,7 +1,6 @@
 ﻿namespace DurableTaskSamples.DurableTaskWorker
 {
     using DurableTask.Core.Settings;
-    using DurableTaskSamples.Common.Logging;
     using DurableTaskSamples.Common.Utils;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
@@ -34,29 +33,13 @@
 
             var configuration = builder.Configuration;
 
-            if (args.Length == 0)
-            {
-                if (Utils.ShouldDisableVerboseLogsInOrchestration(configuration))
-                {
-                    Logger.SetVerbosity(false);
-                }
-            }
-
-            if (args.Length == 1)
-            {
-                if (args[0] == "disableVerboseLogs")
-                {
-                    Logger.SetVerbosity(false);
-                }
-            }
-
             Console.CancelKeyPress += (sender, eArgs) =>
             {
                 _quitEvent.Set();
                 eArgs.Cancel = true;
             };
 
-            var taskHubWorker = new DurableTaskWorker(configuration);
+            var taskHubWorker = new DurableTaskWorker(configuration, host.Services.GetRequiredService<ILoggerFactory>());
             try
             {
                 Console.WriteLine("Initializing worker");

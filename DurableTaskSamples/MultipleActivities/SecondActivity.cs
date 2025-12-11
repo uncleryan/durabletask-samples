@@ -1,19 +1,22 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
-    using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
 
     public class SecondActivity : TaskActivity<int, bool>
     {
-        private const string Source = "SecondActivity";
+        private readonly ILogger<SecondActivity> _logger;
+
+        public SecondActivity(ILogger<SecondActivity> logger)
+        {
+            _logger = logger;
+        }
+
         protected override bool Execute(TaskContext context, int input)
         {
-            Logger.Log(Source, "Starting");
-
-            Logger.Log(Source, $"Executing {input}");
-            Logger.Log(Source, "Completed");
+            _logger.LogInformation("Starting");
+            _logger.LogInformation("Executing {Input}", input);
+            _logger.LogInformation("Completed");
             return true;
         }
     }

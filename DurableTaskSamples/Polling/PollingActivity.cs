@@ -1,31 +1,30 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTask.Core.Common;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
     public class PollingActivity : AsyncTaskActivity<int, bool>
     {
+        private readonly ILogger<PollingActivity> _logger;
         private readonly int numPolls;
 
-        public PollingActivity(int numPolls = 8)
+        public PollingActivity(ILogger<PollingActivity> logger, int numPolls = 8)
         {
+            _logger = logger;
             this.numPolls = numPolls;
         }
 
-        private const string Source = "PollingActivity";
         protected override async Task<bool> ExecuteAsync(TaskContext context, int input)
         {
-            Logger.Log(Source, "Starting");
+            _logger.LogInformation("Starting");
 
-            Logger.Log(Source, $"Performing async poll task attempt {input}");
+            _logger.LogInformation("Performing async poll task attempt {Input}", input);
             await Task.Delay(TimeSpan.FromSeconds(2)).ConfigureAwait(true);
             
             bool pollingResult = !(input < numPolls);
-            Logger.Log(Source, $"Polling result: {pollingResult}");
+            _logger.LogInformation("Polling result: {PollingResult}", pollingResult);
 
             return pollingResult;
         }

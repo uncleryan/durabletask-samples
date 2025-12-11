@@ -1,8 +1,7 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
@@ -15,28 +14,33 @@ namespace DurableTaskSamples
     /// </summary>
     public class MultipleActivitiesOrchestration : TaskOrchestration<bool, int>
     {
-        private const string Source = "MultipleActivitiesOrchestration";
+        private readonly ILogger<MultipleActivitiesOrchestration> _logger;
+
+        public MultipleActivitiesOrchestration(ILogger<MultipleActivitiesOrchestration> logger)
+        {
+            _logger = logger;
+        }
 
         public override async Task<bool> RunTask(OrchestrationContext context, int input)
         {
             try
             {
-                Logger.Log(Source, $"Initiating, IsReplaying: {context.IsReplaying}");
+                _logger.LogInformation("Initiating, IsReplaying: {IsReplaying}", context.IsReplaying);
 
-                Logger.LogVerbose(Source, $"Scheduling FirstActivity");
+                _logger.LogDebug("Scheduling FirstActivity");
                 bool result = await context.ScheduleTask<bool>(typeof(FirstActivity), input);
-                Logger.LogVerbose(Source, $"FirstActivity returned {result}");
+                _logger.LogDebug("FirstActivity returned {Result}", result);
 
-                Logger.LogVerbose(Source, $"Scheduling SecondActivity");
+                _logger.LogDebug("Scheduling SecondActivity");
                 result = await context.ScheduleTask<bool>(typeof(SecondActivity), input + 1);
-                Logger.LogVerbose(Source, $"SecondActivity returned {result}");
+                _logger.LogDebug("SecondActivity returned {Result}", result);
 
-                Logger.Log(Source, "Completed");
+                _logger.LogInformation("Completed");
                 return result;
             }
             catch (Exception ex)
             {
-                Logger.Log(Source, ex.ToString());
+                _logger.LogError(ex, "Error in orchestration");
                 return false;
             }
         }

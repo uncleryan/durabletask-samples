@@ -1,14 +1,19 @@
 namespace DurableTaskSamples.Otp
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
     public class OtpOrchestration : TaskOrchestration<bool, string>
     {
-        private const string Source = "OtpOrchestration";
+        private readonly ILogger<OtpOrchestration> _logger;
         private readonly TaskCompletionSource<string> _otpTcs = new TaskCompletionSource<string>();
+
+        public OtpOrchestration(ILogger<OtpOrchestration> logger)
+        {
+            _logger = logger;
+        }
 
         public override void OnEvent(OrchestrationContext context, string name, string input)
         {
@@ -20,7 +25,7 @@ namespace DurableTaskSamples.Otp
 
         public override async Task<bool> RunTask(OrchestrationContext context, string userId)
         {
-            Logger.Log(Source, $"Starting OTP flow for user {userId}");
+            _logger.LogInformation("Starting OTP flow for user {UserId}", userId);
 
             // Generate OTP
             var code = await context.ScheduleTask<string>(typeof(GenerateOtpActivity), userId);
@@ -39,18 +44,18 @@ namespace DurableTaskSamples.Otp
                 var inputCode = eventTask.Result;
                 if (string.Equals(inputCode, code, StringComparison.OrdinalIgnoreCase))
                 {
-                    Logger.Log(Source, "OTP verified successfully");
+                    _logger.LogInformation("OTP verified successfully");
                     return true;
                 }
                 else
                 {
-                    Logger.Log(Source, "OTP verification failed");
+                    _logger.LogInformation("OTP verification failed");
                     return false;
                 }
             }
             else
             {
-                Logger.Log(Source, "OTP timed out");
+                _logger.LogInformation("OTP timed out");
                 return false;
             }
         }

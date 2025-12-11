@@ -1,33 +1,37 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
     public class InlineForLoopTestingOrchestration : TaskOrchestration<bool, int>
     {
-        private const string Source = "InlineForLoopTestingOrchestration";
+        private readonly ILogger<InlineForLoopTestingOrchestration> _logger;
+
+        public InlineForLoopTestingOrchestration(ILogger<InlineForLoopTestingOrchestration> logger)
+        {
+            _logger = logger;
+        }
 
         public override async Task<bool> RunTask(OrchestrationContext context, int input)
         {
             try
             {
-                Logger.Log(Source, $"Initiating, IsReplaying: {context.IsReplaying}");
+                _logger.LogInformation("Initiating, IsReplaying: {IsReplaying}", context.IsReplaying);
 
                 for (int i = 0; i < input; i++)
                 {
-                    Logger.LogVerbose(Source, $"Executing for {i}");
+                    _logger.LogDebug("Executing for {Index}", i);
                     await context.ScheduleTask<bool>(typeof(GreetingActivity), i);
                 }
 
-                Logger.Log(Source, "Completed");
+                _logger.LogInformation("Completed");
                 return true;
             }
             catch (Exception ex)
             {
-                Logger.Log(Source, ex.ToString());
+                _logger.LogError(ex, "Error in orchestration");
                 return false;
             }
         }

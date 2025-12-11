@@ -1,7 +1,7 @@
 ﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Threading.Tasks;
 
@@ -13,24 +13,29 @@
     ///     identify that this is a separate invocation and not the first one.
     ///   - Each instance of the activity is only executed once, even the orchestration runs multiple times
     /// </summary>
-    public class SameActivityMultipleSchedulesOrchestration: TaskOrchestration<bool, int>
+    public class SameActivityMultipleSchedulesOrchestration : TaskOrchestration<bool, int>
     {
-        private const string Source = "SameActivityMultipleSchedulesOrchestration";
+        private readonly ILogger<SameActivityMultipleSchedulesOrchestration> _logger;
+
+        public SameActivityMultipleSchedulesOrchestration(ILogger<SameActivityMultipleSchedulesOrchestration> logger)
+        {
+            _logger = logger;
+        }
 
         public override async Task<bool> RunTask(OrchestrationContext context, int input)
         {
             try
             {
-                Logger.Log(Source, $"Initiating, IsReplaying: {context.IsReplaying}");
+                _logger.LogInformation("Initiating, IsReplaying: {IsReplaying}", context.IsReplaying);
                 await context.ScheduleTask<bool>(typeof(GreetingActivity), input);
                 await context.ScheduleTask<bool>(typeof(GreetingActivity), input);
                 await context.ScheduleTask<bool>(typeof(GreetingActivity), 42);
-                Logger.Log(Source, "Completed");
+                _logger.LogInformation("Completed");
                 return true;
             }
             catch (Exception ex)
             {
-                Logger.Log(Source, ex.ToString());
+                _logger.LogError(ex, "Error in orchestration");
                 return false;
             }
         }

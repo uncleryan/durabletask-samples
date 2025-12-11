@@ -1,19 +1,24 @@
-﻿
-namespace DurableTaskSamples
+﻿namespace DurableTaskSamples
 {
     using DurableTask.Core;
-    using DurableTaskSamples.Common.Logging;
+    using Microsoft.Extensions.Logging;
     using System.Threading.Tasks;
 
-    public class GreetingActivity: AsyncTaskActivity<int, bool>
+    public class GreetingActivity : AsyncTaskActivity<int, bool>
     {
-        private const string Source = "GreetingActivity";
+        private readonly ILogger<GreetingActivity> _logger;
+
+        public GreetingActivity(ILogger<GreetingActivity> logger)
+        {
+            _logger = logger;
+        }
+
         protected override async Task<bool> ExecuteAsync(TaskContext context, int input)
         {
-            Logger.Log(Source, "Starting");
+            _logger.LogInformation("Starting");
             await Task.Delay(5).ConfigureAwait(false);
-            Logger.Log(Source, $"Executing {input}");
-            Logger.Log(Source, "Completed");
+            _logger.LogInformation("Executing {Input}", input);
+            _logger.LogInformation("Completed");
 
             await Task.Delay(2000);
             
