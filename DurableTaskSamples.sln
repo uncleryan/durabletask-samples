@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DurableTaskSamples.ServiceD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DurableTask.SqlServer", "DurableTask.SqlServer\DurableTask.SqlServer.csproj", "{C75604C2-A953-E789-3128-E92A1258174D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DurableTask.PostgresSQL", "DurableTask.PostgresSQL\DurableTask.PostgresSQL.csproj", "{DBEB7EA8-237F-4970-8FFB-8AE49FCB6737}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -62,6 +64,10 @@ Global
 		{C75604C2-A953-E789-3128-E92A1258174D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C75604C2-A953-E789-3128-E92A1258174D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C75604C2-A953-E789-3128-E92A1258174D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBEB7EA8-237F-4970-8FFB-8AE49FCB6737}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBEB7EA8-237F-4970-8FFB-8AE49FCB6737}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBEB7EA8-237F-4970-8FFB-8AE49FCB6737}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBEB7EA8-237F-4970-8FFB-8AE49FCB6737}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
