@@ -1,10 +1,16 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 namespace DurableTask.PostgresSQL
 {
-    using Newtonsoft.Json;
-    using SemVersion;
+    using System;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
+    using DurableTask.Core;
+    using DurableTask.Core.History;
+    using Newtonsoft.Json;
+    using SemVersion;
 
     static class DTUtils
     {
@@ -65,6 +71,45 @@ namespace DurableTask.PostgresSQL
         public static string EscapeJson(string unescapedJson)
         {
             return JsonConvert.ToString(unescapedJson);
+        }
+
+        public static int GetTaskEventId(HistoryEvent e)
+        {
+            return e switch
+            {
+                TaskScheduledEvent tse => tse.EventId,
+                TaskCompletedEvent tce => tce.TaskScheduledId,
+                TaskFailedEvent tfe => tfe.TaskScheduledId,
+                SubOrchestrationInstanceCreatedEvent soice => soice.EventId,
+                SubOrchestrationInstanceCompletedEvent soice => soice.TaskScheduledId,
+                SubOrchestrationInstanceFailedEvent soife => soife.TaskScheduledId,
+                TimerCreatedEvent tce => tce.EventId,
+                TimerFiredEvent tfe => tfe.TimerId,
+                EventSentEvent ese => ese.EventId,
+                EventRaisedEvent ere => ere.EventId,
+                _ => -1
+            };
+        }
+
+        public static bool HasPayload(HistoryEvent e)
+        {
+            return e switch
+            {
+                ExecutionStartedEvent => true,
+                ExecutionCompletedEvent => true,
+                ExecutionTerminatedEvent => true,
+                TaskScheduledEvent => true,
+                TaskCompletedEvent => true,
+                TaskFailedEvent => true,
+                SubOrchestrationInstanceCreatedEvent => true,
+                SubOrchestrationInstanceCompletedEvent => true,
+                SubOrchestrationInstanceFailedEvent => true,
+                TimerCreatedEvent => false,
+                TimerFiredEvent => false,
+                EventSentEvent => true,
+                EventRaisedEvent => true,
+                _ => false
+            };
         }
     }
 }
